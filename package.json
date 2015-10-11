@@ -1,0 +1,37 @@
+{
+  "name": "clayman",
+  "version": "0.1.0",
+  "description": "A CSS diff tool to take a base styesheet and theme stylesheet and remove the redundancies from the theme.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/test.js"
+  },
+  "keywords": [
+    "css",
+    "diff"
+  ],
+  "author": "Phil Barresi",
+  "license": "ISC",
+  "dependencies": {
+    "postcss": "^5.0.9"
+  },
+  "devDependencies": {
+    "chai": "^3.3.0",
+    "gulp": "^3.9.0",
+    "gulp-mocha": "^2.1.3",
+    "gulp-typescript": "^2.9.2",
+    "gulp-watch": "^4.3.5",
+    "mocha": "^2.3.3"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xueye/clayman.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xueye/clayman/issues"
+  },
+  "homepage": "https://github.com/xueye/clayman#readme"
+}
