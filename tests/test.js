@@ -33,7 +33,9 @@ describe('Theme DNA', function () {
                 if (err) throw err;
 
                 var result = themeDna.compact(source, 1);
-                assert.equal(1, result.a);
+                assert.equal('purple', result.a.color);
+                assert.equal('center', result.a['text-align']);
+                assert.equal('#999', result['p.foo'].background);
 
                 done();
             });

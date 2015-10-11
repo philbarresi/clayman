@@ -10,24 +10,35 @@ class Clayman {
         }
     }
 
+    
     public compact(source) {
         var compacted = this.postcss.parse(source);
 
-        var rules = compacted.nodes.filter(function (x) {
-            return x.type === "rule";
+        var rules = compacted.nodes.filter((x) => {
+            return x.type === 'rule';
         });
 
-        var expandedRuleSet = {};
+        var expandedRuleSet: {[element: string]: {[property: string]: string}} = {};
 
+        // start setting up your hash table
         rules.forEach((rule) => {
             var selectors = this.getAllSelectors(rule.selector);
+            var declarations = rule.nodes.filter((node) => {
+               return node.type === 'decl';
+            });
 
-            // start setting up your hash table
+            selectors.forEach((selector) => {
+                var rules = expandedRuleSet[selector] || {};
+
+                declarations.forEach((declaration) => {
+                   rules[declaration.prop] = declaration.value;
+                });
+
+                expandedRuleSet[selector] = rules;
+            });
         });
 
-        return {
-            "a": 1
-        };
+        return expandedRuleSet;
     }
 
     public getAllSelectors(selector:string) {

@@ -14,16 +14,24 @@ var Clayman = (function () {
         var _this = this;
         var compacted = this.postcss.parse(source);
         var rules = compacted.nodes.filter(function (x) {
-            return x.type === "rule";
+            return x.type === 'rule';
         });
         var expandedRuleSet = {};
+        // start setting up your hash table
         rules.forEach(function (rule) {
             var selectors = _this.getAllSelectors(rule.selector);
-            // start setting up your hash table
+            var declarations = rule.nodes.filter(function (node) {
+                return node.type === 'decl';
+            });
+            selectors.forEach(function (selector) {
+                var rules = expandedRuleSet[selector] || {};
+                declarations.forEach(function (declaration) {
+                    rules[declaration.prop] = declaration.value;
+                });
+                expandedRuleSet[selector] = rules;
+            });
         });
-        return {
-            "a": 1
-        };
+        return expandedRuleSet;
     };
     Clayman.prototype.getAllSelectors = function (selector) {
         if (!selector)
