@@ -1,0 +1,42 @@
+a {
+    color: pink;
+    text-decoration: underline;
+}
+
+p {
+    color: purple;
+}
+
+a {
+    color: purple;
+}
+
+/* Comment */
+
+p.foo {
+    background: #999;
+}
+
+p, a {
+    text-align: center;
+}
+
+#logo {
+    float: left;
+    margin: 0;
+}
+
+@media screen and (max-width: 500px) {
+    #logo {
+        float: none;
+        margin: 0;
+        text-align: center;
+        display: block;
+        width: auto;
+    }
+
+    p {
+        color: #000;
+        text-align: center;
+    }
+}

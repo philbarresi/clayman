@@ -41,7 +41,11 @@
         <div id="api-tabview-panel">
             <ul id="api-classes" class="apis classes">
             
+                <li><a href="../classes/ArgumentNullException.html">ArgumentNullException</a></li>
+            
                 <li><a href="../classes/Clayman.html">Clayman</a></li>
+            
+                <li><a href="../classes/SelectorRuleSet.html">SelectorRuleSet</a></li>
             
             </ul>
 
@@ -86,73 +90,280 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/// &lt;reference path=&quot;./typings/node/node.d.ts&quot;/&gt;///
+/// &lt;reference path=&quot;./typings/node/node.d.ts&quot;/&gt;
 var postcss = require(&#x27;postcss&#x27;);
-/**
- * This is the main class of Clayman
- *
- * @class Clayman
- * @constructor
- */
-var Clayman = (function () {
-    function Clayman(postcss) {
-        this.postcss = postcss;
-    }
-    Clayman.prototype.selectorRuleSet = function (selector, rules) {
-        return {
-            selector: selector,
-            rules: rules
-        };
-    };
-    /**
-     * Takes a CSS string and converts it into a set of selectors -&gt; rules,
-     * removing redundancy for each selector.
-     *
-     * @method compact
-     * @param {String} source A string representing CSS styles
-     * @return {Object} Returns an object with selector name -&gt; {prop: value}
-     */
-    Clayman.prototype.compact = function (source) {
-        var _this = this;
-        var compacted = this.postcss.parse(source);
-        var rules = compacted.nodes.filter(function (x) {
-            return x.type === &#x27;rule&#x27;;
-        });
-        var expandedRuleSet = {};
-        // start setting up your hash table
-        rules.forEach(function (rule) {
-            var selectors = _this.getAllSelectors(rule.selector);
-            var declarations = rule.nodes.filter(function (node) {
-                return node.type === &#x27;decl&#x27;;
-            });
-            selectors.forEach(function (selector) {
-                var rules = expandedRuleSet[selector] || {};
-                declarations.forEach(function (declaration) {
-                    rules[declaration.prop] = declaration.value;
-                });
-                expandedRuleSet[selector] = rules;
-            });
-        });
-        return expandedRuleSet;
-    };
-    /**
-     * Takes a CSS selector string (ie: &quot;.foo, span.bar&quot;) and extracts all the individual selectors from it.
-     *
-     * @method getAllSelectors
-     * @throws {Error} Cannot parse null selector or empty selector
-     * @param {String} source A string representing any number of CSS selectors
-     * @return {Array} Returns an array of strings with the selector names
-     */
-    Clayman.prototype.getAllSelectors = function (selector) {
+var Clayman;
+(function (Clayman_1) {
+    function getAllSelectors(selector) {
         if (!selector)
-            throw &quot;Cannot parse null selector or empty selector&quot;;
+            throw new ArgumentNullException(&quot;selector&quot;);
         return selector.split(&quot;,&quot;).map(function (selector) {
             return selector.trim();
         });
-    };
-    return Clayman;
-})();
-module.exports = new Clayman(postcss);
+    }
+    var ArgumentNullException = (function () {
+        /**
+         * An error thrown indicating that an argument was null that should not be able to be null
+         *
+         * @class ArgumentNullException
+         * @param {String} argName Name of the argument that could not be null
+         * @constructor
+         */
+        function ArgumentNullException(argName) {
+            this.argName = argName;
+            /**
+             * Name of the exception
+             *
+             * @property name
+             * @type String
+             */
+            this.name = &quot;ArgumentNullException&quot;;
+            /**
+             * The error message
+             *
+             * @property message
+             * @type String
+             */
+            this.message = &quot;&quot;;
+            this.message = &quot;Argument &quot; + argName + &quot; cannot be null&quot;;
+        }
+        return ArgumentNullException;
+    })();
+    var SelectorRuleSet = (function () {
+        /**
+         * A set of rules for a particular CSS selector
+         *
+         * @class SelectorRuleSet
+         * @param {String} selector The name of the CSS selector
+         * @param {String} parent_identifier An identifier used to represent the parent of this CSS ruleset; ie, a media query
+         * @constructor
+         */
+        function SelectorRuleSet(selector, parent_identifier) {
+            /**
+             * An identifier used to identify this selector rule set that will be composed by selectors, media queries, etc
+             *
+             * @property parent_identifier
+             * @type string
+             */
+            this.parent_identifier = &quot;&quot;;
+            /**
+             * The CSS Selector applying to this rule set
+             *
+             * @property selector
+             * @type string
+             */
+            this.selector = &quot;&quot;;
+            /**
+             * The has to determine the uniqueness of the styles for this selector / rule set
+             *
+             * @property hash
+             * @private
+             * @type String
+             */
+            this.hash = &quot;&quot;;
+            /**
+             * Set of rules representing the styles and their associated values
+             *
+             * @property rules
+             * @type Object
+             */
+            this.rules = {};
+            this.selector = selector;
+            this.parent_identifier = parent_identifier;
+        }
+        /**
+         * Gets the hash identifying this selector&#x27;s rules, so uniqueness can be determined
+         *
+         * @param {String} property The property name
+         * @param {String} value The value
+         * @method addRule
+         * @return {String} The hash
+         */
+        SelectorRuleSet.prototype.addRule = function (property, value) {
+            if (!property)
+                throw new ArgumentNullException(&quot;property&quot;);
+            if (!value)
+                throw new ArgumentNullException(&quot;value&quot;);
+            var needsHashRegen = this.rules[property] !== value;
+            this.rules[property] = value;
+            if (needsHashRegen) {
+                this.generateHash();
+            }
+        };
+        /**
+         * Gets the CSS rule for a property
+         *
+         * @param {String} property The property name
+         * @method getRule
+         * @return {String} The rule
+         */
+        SelectorRuleSet.prototype.getRule = function (property) {
+            return this.rules[property];
+        };
+        /**
+         * Gets the hash identifying this selector&#x27;s rules, so uniqueness can be determined
+         *
+         * @method getHash
+         * @return {String} The hash
+         */
+        SelectorRuleSet.prototype.getHash = function () {
+            return this.hash;
+        };
+        /**
+         * Generates the hash identifying this selector&#x27;s rules, so uniqueness can be determined
+         *
+         * @method generateHash
+         * @return {String} The hash
+         */
+        SelectorRuleSet.prototype.generateHash = function () {
+            var _this = this;
+            var orderedKeys = Object.keys(this.rules).sort();
+            var newHash = &quot;&quot;;
+            orderedKeys.forEach(function (ruleKey) {
+                newHash += ruleKey + &quot;:&quot; + _this.rules[ruleKey] + &quot;|&quot;;
+            });
+            this.hash = newHash;
+            return newHash;
+        };
+        SelectorRuleSet.prototype.toString = function () {
+            var _this = this;
+            var ruleKeys = Object.keys(this.rules);
+            if (ruleKeys.length === 0)
+                return &quot;&quot;;
+            var ret = this.selector + &quot; {&quot;;
+            ret += &quot;\n&quot;;
+            ret += ruleKeys.map(function (ruleKey) {
+                return &quot;\t&quot; + ruleKey + &quot;: &quot; + _this.rules[ruleKey] + &quot;;&quot;;
+            }).join(&quot;\n&quot;);
+            ret += &quot;\n}&quot;;
+            return ret;
+        };
+        return SelectorRuleSet;
+    })();
+    var StyleSheet = (function () {
+        function StyleSheet() {
+            this.selectors = {};
+        }
+        StyleSheet.prototype.media = function (node) {
+            return &quot;&quot;;
+        };
+        StyleSheet.prototype.toString = function () {
+            var _this = this;
+            var keys = Object.keys(this.selectors);
+            var ret = &quot;&quot;;
+            var identifierDict = {};
+            keys.forEach(function (key) {
+                var currSelector = _this.selectors[key];
+                if (!identifierDict[currSelector.parent_identifier]) {
+                    identifierDict[currSelector.parent_identifier] = [];
+                }
+                var currentArray = identifierDict[currSelector.parent_identifier];
+                currentArray.push(currSelector);
+            });
+            var identifierDictKeys = Object.keys(identifierDict);
+            identifierDictKeys.forEach(function (identifierKey) {
+                var currList = identifierDict[identifierKey].map(function (rule) {
+                    return rule.toString();
+                }).filter(function (ruleStr) {
+                    return !!ruleStr;
+                });
+                if (currList.length === 0)
+                    return;
+                var indent = false;
+                if (identifierKey) {
+                    indent = true;
+                    ret += &quot;\n@&quot; + identifierKey + &quot;{\n&quot;;
+                }
+                var ruleStringsJoined = currList.join(&quot;\n&quot;);
+                if (indent) {
+                    // add a tab
+                    ruleStringsJoined = ruleStringsJoined.replace(/(^|\n)/g, &#x27;$1\t&#x27;);
+                }
+                ret += ruleStringsJoined;
+                if (identifierKey) {
+                    ret += &quot;\n}\n&quot;;
+                }
+            });
+            return ret;
+        };
+        // one day we&#x27;ll figure out how to get postcss&#x27; definitions working...
+        StyleSheet.prototype.addNode = function (node) {
+            var _this = this;
+            var selectors = getAllSelectors(node.selector);
+            var declarations = node.nodes.filter(function (node) {
+                return node.type === &#x27;decl&#x27;;
+            });
+            var parentIdentifier = &quot;&quot;;
+            if (node.parent.type === &#x27;atrule&#x27;) {
+                parentIdentifier = node.parent.name + &quot; &quot; + node.parent.params;
+            }
+            selectors.forEach(function (selector) {
+                var identifier = (parentIdentifier ? parentIdentifier + &quot;|&quot; : &#x27;&#x27;) + selector;
+                if (!_this.selectors[identifier]) {
+                    _this.selectors[identifier] = new SelectorRuleSet(selector, parentIdentifier);
+                }
+                var ruleSet = _this.selectors[identifier];
+                declarations.forEach(function (declaration) {
+                    ruleSet.addRule(declaration.prop, declaration.value);
+                });
+            });
+        };
+        return StyleSheet;
+    })();
+    var Clayman = (function () {
+        /**
+         * The main class of Clayman
+         *
+         * @class Clayman
+         * @param {PostCSS} postcss An instance of PostCSS
+         * @constructor
+         */
+        function Clayman(postcss) {
+            this.postcss = postcss;
+        }
+        /**
+         * Takes a CSS string and converts it into a set of selectors -&gt; rules,
+         * removing redundancy for each selector.
+         *
+         * @method compact
+         * @param {String} source A string representing CSS styles
+         * @return {Object} Returns an object with selector name -&gt; {prop: value}
+         */
+        Clayman.prototype.compact = function (source) {
+            var compacted = this.postcss.parse(source);
+            // We flatten out into one node array
+            var nodes = [];
+            var nodeDump = function (node) {
+                if (node.type === &#x27;rule&#x27;) {
+                    nodes.push(node);
+                }
+                else if (node.type === &#x27;atrule&#x27;) {
+                    node.nodes.forEach(nodeDump);
+                }
+            };
+            compacted.nodes.forEach(nodeDump);
+            var stylesheet = new StyleSheet();
+            nodes.forEach(function (node) {
+                stylesheet.addNode(node);
+            });
+            return stylesheet;
+        };
+        /**
+         * Takes a CSS selector string (ie: &quot;.foo, span.bar&quot;) and extracts all the individual selectors from it.
+         *
+         * @method getAllSelectors
+         * @throws {Error} Cannot parse null selector or empty selector
+         * @param {String} source A string representing any number of CSS selectors
+         * @return {Array} Returns an array of strings with the selector names
+         */
+        Clayman.prototype.getAllSelectors = function (selector) {
+            return getAllSelectors(selector);
+        };
+        return Clayman;
+    })();
+    Clayman_1.Clayman = Clayman;
+})(Clayman || (Clayman = {}));
+module.exports = new Clayman.Clayman(postcss);
 
     </pre>
 </div>
