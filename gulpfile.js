@@ -30,6 +30,7 @@ gulp.task('documentation', function() {
 gulp.task('default', ['test']);
 
 gulp.task('watch', function () {
+    gulp.watch('./tests/test.js', ['test']);
     gulp.watch('./index.js', ['test', 'documentation']);
     gulp.watch('./index.ts', ['compile']);
 });

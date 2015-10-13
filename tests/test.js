@@ -27,32 +27,44 @@ describe('Theme DNA', function () {
         });
     });
 
-    describe("compacting", function () {
-        it('Should be compacted', function (done) {
-            fs.readFile(path.join(__dirname, 'simple-style.css'), 'utf8', function (err, source) {
-                if (err) throw err;
+    describe('General', function () {
 
-                var result = clayman.compact(source);
-                assert.equal('purple', result.selectors.a.getRule('color'));
-                assert.equal('center', result.selectors.a.getRule('text-align'));
-                assert.equal('#999', result.selectors['p.foo'].getRule('background'));
+    });
 
-                done();
+    describe("diffing", function () {
+        it('Should error when given no sources', function () {
+            assert.throw(function () {
+                clayman.diff();
             });
         });
 
-        it('Should be be compacting a responsive stylesheet', function (done) {
-            fs.readFile(path.join(__dirname, 'responsive-style.css'), 'utf8', function (err, source) {
-                if (err) throw err;
+        it('Should not throw when given 2 files', function () {
+            var source1 = fs.readFileSync(path.join(__dirname, 'simple-style.css')).toString();
+            var source2 = fs.readFileSync(path.join(__dirname, 'simple-style-2.css')).toString();
 
-                var result = clayman.compact(source);
-                console.log(result.toString());
-                assert.equal('purple', result.selectors.a.getRule('color'));
-                assert.equal('center', result.selectors.a.getRule('text-align'));
-                assert.equal('#999', result.selectors['p.foo'].getRule('background'));
+            var result = clayman.difference(source1, source2);
+            console.log(result.toString());
+        });
+    })
 
-                done();
-            });
+    describe("compacting", function () {
+        it('Should be compacted', function () {
+            var source = fs.readFileSync(path.join(__dirname, 'simple-style.css')).toString();
+
+            var result = clayman.compact(source);
+            assert.equal('purple', result.selectors.a.getRule('color'));
+            assert.equal('center', result.selectors.a.getRule('text-align'));
+            assert.equal('#999', result.selectors['p.foo'].getRule('background'));
+        });
+
+        it('Should be be compacting a responsive stylesheet', function () {
+            var source = fs.readFileSync(path.join(__dirname, 'responsive-style.css')).toString();
+
+            var result = clayman.compact(source);
+            // console.log(result.toString());
+            assert.equal('purple', result.selectors.a.getRule('color'));
+            assert.equal('center', result.selectors.a.getRule('text-align'));
+            assert.equal('#999', result.selectors['p.foo'].getRule('background'));
         });
     });
 });

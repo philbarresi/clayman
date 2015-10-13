@@ -194,6 +194,16 @@ var Clayman;
             });
             return ret;
         };
+        StyleSheet.prototype.addRuleSet = function (selector, parentIdentifier, declarations) {
+            var identifier = (parentIdentifier ? parentIdentifier + "|" : '') + selector;
+            if (!this.selectors[identifier]) {
+                this.selectors[identifier] = new SelectorRuleSet(selector, parentIdentifier);
+            }
+            var ruleSet = this.selectors[identifier];
+            declarations.forEach(function (declaration) {
+                ruleSet.addRule(declaration.prop, declaration.value);
+            });
+        };
         // one day we'll figure out how to get postcss' definitions working...
         StyleSheet.prototype.addNode = function (node) {
             var _this = this;
@@ -206,15 +216,64 @@ var Clayman;
                 parentIdentifier = node.parent.name + " " + node.parent.params;
             }
             selectors.forEach(function (selector) {
-                var identifier = (parentIdentifier ? parentIdentifier + "|" : '') + selector;
-                if (!_this.selectors[identifier]) {
-                    _this.selectors[identifier] = new SelectorRuleSet(selector, parentIdentifier);
-                }
-                var ruleSet = _this.selectors[identifier];
-                declarations.forEach(function (declaration) {
-                    ruleSet.addRule(declaration.prop, declaration.value);
-                });
+                _this.addRuleSet(selector, parentIdentifier, declarations);
             });
+        };
+        StyleSheet.prototype.difference = function (other) {
+            var _this = this;
+            if (!other)
+                throw new ArgumentNullException("other");
+            var ret = new StyleSheet();
+            // We look for entire rules that other has that this stylesheet doesnot
+            // We look for rules that they share, where there are new rules in other
+            Object.keys(other.selectors).forEach(function (key) {
+                if (!_this.selectors[key]) {
+                    // we need to add it because `other` has something new
+                    var ruleSet = other.selectors[key];
+                    var rules = Object.keys(ruleSet.rules).map(function (rule) {
+                        return { prop: rule, value: ruleSet.rules[rule] };
+                    });
+                    ret.addRuleSet(ruleSet.selector, ruleSet.parent_identifier, rules);
+                }
+                else {
+                    // ignore rules where they are shared
+                    // if all rules are shared, ignore elements
+                    // only add rules where they are different
+                    var baseSet = _this.selectors[key];
+                    var otherSet = other.selectors[key];
+                    var newRules = [];
+                    Object.keys(otherSet.rules).forEach(function (rule) {
+                        if (baseSet.rules[rule] !== otherSet.rules[rule]) {
+                            newRules.push({ prop: rule, value: otherSet.rules[rule] });
+                        }
+                    });
+                    if (newRules.length > 0) {
+                        ret.addRuleSet(baseSet.selector, baseSet.parent_identifier, newRules);
+                    }
+                }
+            });
+            return ret;
+        };
+        StyleSheet.prototype.merge = function (other) {
+            var _this = this;
+            if (!other)
+                throw new ArgumentNullException("other");
+            var ret = new StyleSheet();
+            Object.keys(this.selectors).forEach(function (key) {
+                var ruleSet = _this.selectors[key];
+                var rules = Object.keys(ruleSet.rules).map(function (rule) {
+                    return { prop: rule, value: ruleSet.rules[rule] };
+                });
+                ret.addRuleSet(ruleSet.selector, ruleSet.parent_identifier, rules);
+            });
+            Object.keys(other.selectors).forEach(function (key) {
+                var ruleSet = other.selectors[key];
+                var rules = Object.keys(ruleSet.rules).map(function (rule) {
+                    return { prop: rule, value: ruleSet.rules[rule] };
+                });
+                ret.addRuleSet(ruleSet.selector, ruleSet.parent_identifier, rules);
+            });
+            return ret;
         };
         return StyleSheet;
     })();
@@ -229,6 +288,25 @@ var Clayman;
         function Clayman(postcss) {
             this.postcss = postcss;
         }
+        Clayman.prototype.difference = function () {
+            var _this = this;
+            var sources = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                sources[_i - 0] = arguments[_i];
+            }
+            if (sources.length == 0)
+                throw Error("Must supply at least one source");
+            var claymanSources = sources.map(function (source) {
+                return _this.compact(source);
+            });
+            var base = claymanSources[0];
+            var others = claymanSources.slice(1);
+            var othersMerged = others.reduce(function (prev, curr) {
+                return prev.merge(curr);
+            });
+            var diff = base.difference(othersMerged);
+            return diff;
+        };
         /**
          * Takes a CSS string and converts it into a set of selectors -> rules,
          * removing redundancy for each selector.

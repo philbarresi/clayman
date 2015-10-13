@@ -227,6 +227,20 @@ module Clayman {
             return ret;
         }
 
+        public addRuleSet(selector:string, parentIdentifier:string, declarations) {
+            var identifier = (parentIdentifier ? parentIdentifier + "|" : '') + selector;
+
+            if (!this.selectors[identifier]) {
+                this.selectors[identifier] = new SelectorRuleSet(selector, parentIdentifier);
+            }
+
+            var ruleSet = this.selectors[identifier];
+
+            declarations.forEach((declaration) => {
+                ruleSet.addRule(declaration.prop, declaration.value);
+            });
+        }
+
         // one day we'll figure out how to get postcss' definitions working...
         public addNode(node) {
             var selectors = getAllSelectors(node.selector);
@@ -242,23 +256,99 @@ module Clayman {
             }
 
             selectors.forEach((selector) => {
-                var identifier = (parentIdentifier ? parentIdentifier + "|" : '') + selector;
+                this.addRuleSet(selector, parentIdentifier, declarations);
+            });
+        }
 
+        public difference(other:StyleSheet):StyleSheet {
+            if (!other) throw new ArgumentNullException("other");
 
-                if (!this.selectors[identifier]) {
-                    this.selectors[identifier] = new SelectorRuleSet(selector, parentIdentifier);
+            var ret = new StyleSheet();
+
+            // We look for entire rules that other has that this stylesheet doesnot
+            // We look for rules that they share, where there are new rules in other
+            Object.keys(other.selectors).forEach((key) => {
+                if (!this.selectors[key]) {
+                    // we need to add it because `other` has something new
+                    var ruleSet = other.selectors[key];
+
+                    var rules = Object.keys(ruleSet.rules).map((rule) => {
+                        return {prop: rule, value: ruleSet.rules[rule]};
+                    });
+
+                    ret.addRuleSet(ruleSet.selector, ruleSet.parent_identifier, rules)
+
+                } else {
+                    // ignore rules where they are shared
+                    // if all rules are shared, ignore elements
+                    // only add rules where they are different
+                    var baseSet = this.selectors[key];
+                    var otherSet = other.selectors[key];
+                    var newRules:{prop: string, value: string}[] = [];
+
+                    Object.keys(otherSet.rules).forEach((rule) => {
+                        if (baseSet.rules[rule] !== otherSet.rules[rule]) {
+                            newRules.push({prop: rule, value: otherSet.rules[rule]});
+                        }
+                    });
+
+                    if (newRules.length > 0) {
+                        ret.addRuleSet(baseSet.selector, baseSet.parent_identifier, newRules);
+                    }
                 }
 
-                var ruleSet = this.selectors[identifier];
-
-                declarations.forEach((declaration) => {
-                    ruleSet.addRule(declaration.prop, declaration.value);
-                });
             });
+
+            return ret;
+        }
+
+        public merge(other:StyleSheet):StyleSheet {
+            if (!other) throw new ArgumentNullException("other");
+
+            var ret = new StyleSheet();
+
+            Object.keys(this.selectors).forEach((key:string) => {
+                var ruleSet = this.selectors[key];
+
+                var rules = Object.keys(ruleSet.rules).map((rule) => {
+                    return {prop: rule, value: ruleSet.rules[rule]};
+                });
+
+                ret.addRuleSet(ruleSet.selector, ruleSet.parent_identifier, rules)
+            });
+
+            Object.keys(other.selectors).forEach((key:string) => {
+                var ruleSet = other.selectors[key];
+
+                var rules = Object.keys(ruleSet.rules).map((rule) => {
+                    return {prop: rule, value: ruleSet.rules[rule]};
+                });
+
+                ret.addRuleSet(ruleSet.selector, ruleSet.parent_identifier, rules)
+            });
+
+            return ret;
         }
     }
 
     export class Clayman {
+        public difference(...sources:string[]):StyleSheet {
+            if (sources.length == 0) throw Error("Must supply at least one source")
+
+            var claymanSources = sources.map((source) => {
+                return this.compact(source);
+            });
+
+            var base = claymanSources[0];
+            var others = claymanSources.slice(1);
+            var othersMerged = others.reduce((prev, curr) => {
+                return prev.merge(curr);
+            });
+
+            var diff = base.difference(othersMerged);
+
+            return diff;
+        }
 
         /**
          * Takes a CSS string and converts it into a set of selectors -> rules,
@@ -268,7 +358,7 @@ module Clayman {
          * @param {String} source A string representing CSS styles
          * @return {Object} Returns an object with selector name -> {prop: value}
          */
-        public compact(source:string) {
+        public compact(source:string):StyleSheet {
             var compacted = this.postcss.parse(source);
 
             // We flatten out into one node array

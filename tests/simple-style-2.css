@@ -1,0 +1,12 @@
+a {
+    font-weight: 700;
+    color: purple;
+}
+
+.bar {
+    overflow: auto;
+}
+
+p, .foo {
+    color: #0b97c4;
+}
