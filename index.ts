@@ -136,20 +136,38 @@ module Clayman {
             return newHash;
         }
 
+        /**
+         * Displays the rule set as a css string
+         *
+         * @method toString
+         * @return {String} The result
+         */
         public toString():string {
             var ruleKeys = Object.keys(this.rules);
             if (ruleKeys.length === 0) return "";
 
-            var ret = this.selector + " {";
+            var ret = this.selector + " {\n";
 
-            ret += "\n";
-            ret += ruleKeys.map((ruleKey) => {
-                return "\t" + ruleKey + ": " + this.rules[ruleKey] + ";"
-            }).join("\n");
+            ret += this.bodyString();
 
             ret += "\n}";
 
             return ret;
+        }
+
+        /**
+         * Convenience function that returns the body of the CSS block as a string
+         *
+         * @method bodyString
+         * @return {String} The result
+         */
+        public bodyString() {
+            var ruleKeys = Object.keys(this.rules);
+            if (ruleKeys.length === 0) return "";
+
+            return ruleKeys.map((ruleKey) => {
+                return "\t" + ruleKey + ": " + this.rules[ruleKey] + ";"
+            }).join("\n");
         }
 
         /**
@@ -170,10 +188,12 @@ module Clayman {
     class StyleSheet {
         public selectors:{[key: string] : SelectorRuleSet} = {};
 
-        public media(node):string {
-            return "";
-        }
-
+        /**
+         * Outputs the plaintext representing the StyleSheet
+         *
+         * @method toString
+         * @return {String} The result
+         */
         public toString() {
             var keys = Object.keys(this.selectors);
 
@@ -195,8 +215,30 @@ module Clayman {
             var identifierDictKeys = Object.keys(identifierDict);
 
             identifierDictKeys.forEach((identifierKey) => {
-                var currList = identifierDict[identifierKey].map((rule) => {
-                    return rule.toString();
+                var hashGroups:{[key: string]: SelectorRuleSet[]} = {}
+
+                identifierDict[identifierKey].forEach((rule) => {
+                    var hash = rule.getHash();
+
+                    if (hashGroups[hash]) {
+                        hashGroups[hash].push(rule);
+                    } else {
+                        hashGroups[hash] = [rule];
+                    }
+                });
+
+                var currList = Object.keys(hashGroups).map((groupKey) => {
+                    var group = hashGroups[groupKey];
+
+                    var newSelector = group.map((entry) => {
+                        return entry.selector
+                    }).join(", ");
+
+                    var ret = newSelector + " {\n";
+                    ret += group[0].bodyString();
+                    ret += "\n}";
+
+                    return ret;
                 }).filter((ruleStr) => {
                     return !!ruleStr;
                 });
@@ -210,7 +252,9 @@ module Clayman {
                     ret += "\n@" + identifierKey + "{\n";
                 }
 
-                var ruleStringsJoined = currList.join("\n");
+                var ruleStringsJoined = currList.map((entry) => {
+                    return entry;
+                }).join("\n\n");
 
                 if (indent) {
                     // add a tab
@@ -227,6 +271,14 @@ module Clayman {
             return ret;
         }
 
+        /**
+         * Adds a set of rules to the StyleSheet
+         *
+         * @param {String} selector The CSS Selector
+         * @param {String} parentIdentifier A way to identify the parent (root, media query, etc)
+         * @param {Array} declarations An array of style declarations
+         * @method addRuleSet
+         */
         public addRuleSet(selector:string, parentIdentifier:string, declarations) {
             var identifier = (parentIdentifier ? parentIdentifier + "|" : '') + selector;
 
@@ -241,7 +293,12 @@ module Clayman {
             });
         }
 
-        // one day we'll figure out how to get postcss' definitions working...
+        /**
+         * Convenience Function; adds a node from parsecss to the stylesheet
+         *
+         * @param {Object} node The parseCSS node
+         * @method addNode
+         */
         public addNode(node) {
             var selectors = getAllSelectors(node.selector);
 
@@ -260,6 +317,13 @@ module Clayman {
             });
         }
 
+        /**
+         * Creates a new StyleSheet containing the difference between the current StyleSheet and another StyleSheet.
+         *
+         * @param {StyleSheet} other The StyleSheet to extract a difference against
+         * @method difference
+         * @return {StyleSheet} A StyleSheet representing the difference
+         */
         public difference(other:StyleSheet):StyleSheet {
             if (!other) throw new ArgumentNullException("other");
 
@@ -302,6 +366,13 @@ module Clayman {
             return ret;
         }
 
+        /**
+         * Creates a new StyleSheet containing the combined properties and rules of the current StyleSheet and another.
+         *
+         * @param {StyleSheet} other The other StyleSheet
+         * @method merge
+         * @return {StyleSheet} A StyleSheet representing the union of the two
+         */
         public merge(other:StyleSheet):StyleSheet {
             if (!other) throw new ArgumentNullException("other");
 
@@ -329,9 +400,28 @@ module Clayman {
 
             return ret;
         }
+
+
+        /**
+         * A Representation of a StyleSheet
+         *
+         * @class StyleSheet
+         * @constructor
+         */
+        constructor() {
+
+        }
     }
 
     export class Clayman {
+        /**
+         * Takes two or more StyleSheets and returns a difference of their rules in a Clayman StyleSheet
+         *
+         * @method difference
+         * @param {Array} sources An array of strings representing CSS Stylesheets
+         * @return {StyleSheet} Returns a ClaymanStylesheet representing the difference
+         * between the base and all other stylesheets
+         */
         public difference(...sources:string[]):StyleSheet {
             if (sources.length == 0) throw Error("Must supply at least one source")
 
@@ -351,12 +441,11 @@ module Clayman {
         }
 
         /**
-         * Takes a CSS string and converts it into a set of selectors -> rules,
-         * removing redundancy for each selector.
+         * Takes a CSS string and converts it into a compacted Clayman StyleSheet
          *
          * @method compact
          * @param {String} source A string representing CSS styles
-         * @return {Object} Returns an object with selector name -> {prop: value}
+         * @return {StyleSheet} A Clayman StyleSheet of the source
          */
         public compact(source:string):StyleSheet {
             var compacted = this.postcss.parse(source);
@@ -371,7 +460,7 @@ module Clayman {
                 else if (node.type === 'atrule') {
                     node.nodes.forEach(nodeDump);
                 }
-            }
+            };
 
             compacted.nodes.forEach(nodeDump);
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Clayman</title>
+    <title>StyleSheet</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -88,7 +88,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>Clayman Class</h1>
+                        <h1>StyleSheet Class</h1>
 <div class="box meta">
     
 
@@ -96,7 +96,7 @@
 
     
         <div class="foundat">
-            Defined in: <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l353"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:353</code></a>
+            Defined in: <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l169"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:169</code></a>
         </div>
     
 
@@ -108,28 +108,18 @@
 
 
 <div class="box intro">
-    <p>The main class of Clayman</p>
+    <p>A Representation of a StyleSheet</p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_Clayman" class="method item">
-    <h3 class="name"><code>Clayman</code></h3>
+        <div id="method_StyleSheet" class="method item">
+    <h3 class="name"><code>StyleSheet</code></h3>
 
     
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>postcss</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
+        <span class="paren">()</span>
     
 
     
@@ -157,7 +147,7 @@
             
         
         
-        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l353"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:353</code></a>
+        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l169"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:169</code></a>
         
         </p>
 
@@ -171,30 +161,6 @@
         
     </div>
 
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">postcss</code>
-                        <span class="type">PostCSS</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>An instance of PostCSS</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
     
 
     
@@ -228,7 +194,14 @@
                     <ul class="index-list methods">
                         
                             <li class="index-item method">
-                                <a href="#method_compact">compact</a>
+                                <a href="#method_addNode">addNode</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_addRuleSet">addRuleSet</a>
 
                                 
                                 
@@ -242,7 +215,14 @@
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_getAllSelectors">getAllSelectors</a>
+                                <a href="#method_merge">merge</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_toString">toString</a>
 
                                 
                                 
@@ -264,8 +244,8 @@
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_compact" class="method item">
-    <h3 class="name"><code>compact</code></h3>
+                    <div id="method_addNode" class="method item">
+    <h3 class="name"><code>addNode</code></h3>
 
     
         <div class="args">
@@ -273,7 +253,7 @@
             
                 <li class="arg">
                     
-                        <code>source</code>
+                        <code>node</code>
                     
                 </li>
             
@@ -281,10 +261,6 @@
         </div>
     
 
-    
-        <span class="returns-inline">
-            <span class="type"><a href="../classes/StyleSheet.html" class="crosslink">StyleSheet</a></span>
-        </span>
     
 
     
@@ -310,7 +286,7 @@
             
         
         
-        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l390"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:390</code></a>
+        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l260"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:260</code></a>
         
         </p>
 
@@ -321,7 +297,7 @@
     </div>
 
     <div class="description">
-        <p>Takes a CSS string and converts it into a compacted Clayman StyleSheet</p>
+        <p>Convenience Function; adds a node from parsecss to the stylesheet</p>
 
     </div>
 
@@ -333,14 +309,14 @@
             
                 <li class="param">
                     
-                        <code class="param-name">source</code>
-                        <span class="type">String</span>
+                        <code class="param-name">node</code>
+                        <span class="type">Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>A string representing CSS styles</p>
+                        <p>The parseCSS node</p>
 
                     </div>
 
@@ -352,19 +328,138 @@
     
 
     
-        <div class="returns">
-            <h4>Returns:</h4>
 
-            <div class="returns-description">
-                
-                    
-                        <span class="type"><a href="../classes/StyleSheet.html" class="crosslink">StyleSheet</a></span>:
-                    
-                    <p>A Clayman StyleSheet of the source</p>
+    
+</div>
 
                 
-            </div>
+                    <div id="method_addRuleSet" class="method item">
+    <h3 class="name"><code>addRuleSet</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>selector</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>parentIdentifier</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>declarations</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
         </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l242"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:242</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Adds a set of rules to the StyleSheet</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">selector</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>The CSS Selector</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">parentIdentifier</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>A way to identify the parent (root, media query, etc)</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">declarations</code>
+                        <span class="type">Array</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>An array of style declarations</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
     
 
     
@@ -380,7 +475,7 @@
             
                 <li class="arg">
                     
-                        <code>sources</code>
+                        <code>other</code>
                     
                 </li>
             
@@ -417,7 +512,7 @@
             
         
         
-        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l363"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:363</code></a>
+        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l280"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:280</code></a>
         
         </p>
 
@@ -428,7 +523,7 @@
     </div>
 
     <div class="description">
-        <p>Takes two or more StyleSheets and returns a difference of their rules in a Clayman StyleSheet</p>
+        <p>Creates a new StyleSheet containing the difference between the current StyleSheet and another StyleSheet.</p>
 
     </div>
 
@@ -440,14 +535,14 @@
             
                 <li class="param">
                     
-                        <code class="param-name">sources</code>
-                        <span class="type">Array</span>
+                        <code class="param-name">other</code>
+                        <span class="type"><a href="../classes/StyleSheet.html" class="crosslink">StyleSheet</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>An array of strings representing CSS Stylesheets</p>
+                        <p>The StyleSheet to extract a difference against</p>
 
                     </div>
 
@@ -467,8 +562,7 @@
                     
                         <span class="type"><a href="../classes/StyleSheet.html" class="crosslink">StyleSheet</a></span>:
                     
-                    <p>Returns a ClaymanStylesheet representing the difference
-between the base and all other stylesheets</p>
+                    <p>A StyleSheet representing the difference</p>
 
                 
             </div>
@@ -479,8 +573,8 @@ between the base and all other stylesheets</p>
 </div>
 
                 
-                    <div id="method_getAllSelectors" class="method item">
-    <h3 class="name"><code>getAllSelectors</code></h3>
+                    <div id="method_merge" class="method item">
+    <h3 class="name"><code>merge</code></h3>
 
     
         <div class="args">
@@ -488,7 +582,7 @@ between the base and all other stylesheets</p>
             
                 <li class="arg">
                     
-                        <code>source</code>
+                        <code>other</code>
                     
                 </li>
             
@@ -498,7 +592,7 @@ between the base and all other stylesheets</p>
 
     
         <span class="returns-inline">
-            <span class="type">Array</span>
+            <span class="type"><a href="../classes/StyleSheet.html" class="crosslink">StyleSheet</a></span>
         </span>
     
 
@@ -525,7 +619,7 @@ between the base and all other stylesheets</p>
             
         
         
-        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l416"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:416</code></a>
+        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l322"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:322</code></a>
         
         </p>
 
@@ -536,7 +630,7 @@ between the base and all other stylesheets</p>
     </div>
 
     <div class="description">
-        <p>Takes a CSS selector string (ie: &quot;.foo, span.bar&quot;) and extracts all the individual selectors from it.</p>
+        <p>Creates a new StyleSheet containing the combined properties and rules of the current StyleSheet and another.</p>
 
     </div>
 
@@ -548,14 +642,14 @@ between the base and all other stylesheets</p>
             
                 <li class="param">
                     
-                        <code class="param-name">source</code>
-                        <span class="type">String</span>
+                        <code class="param-name">other</code>
+                        <span class="type"><a href="../classes/StyleSheet.html" class="crosslink">StyleSheet</a></span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>A string representing any number of CSS selectors</p>
+                        <p>The other StyleSheet</p>
 
                     </div>
 
@@ -573,9 +667,82 @@ between the base and all other stylesheets</p>
             <div class="returns-description">
                 
                     
-                        <span class="type">Array</span>:
+                        <span class="type"><a href="../classes/StyleSheet.html" class="crosslink">StyleSheet</a></span>:
                     
-                    <p>Returns an array of strings with the selector names</p>
+                    <p>A StyleSheet representing the union of the two</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_toString" class="method item">
+    <h3 class="name"><code>toString</code></h3>
+
+    
+        <span class="paren">()</span>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">String</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/_Users_xueye_Dropbox_Work_clayman_index.js.html#l178"><code>&#x2F;Users&#x2F;xueye&#x2F;Dropbox&#x2F;Work&#x2F;clayman&#x2F;index.js:178</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Outputs the plaintext representing the StyleSheet</p>
+
+    </div>
+
+    
+
+    
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                
+                    
+                        <span class="type">String</span>:
+                    
+                    <p>The result</p>
 
                 
             </div>

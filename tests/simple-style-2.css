@@ -7,6 +7,10 @@ a {
     overflow: auto;
 }
 
-p, .foo {
+p, .foo, .bar {
     color: #0b97c4;
+}
+
+p > .bar {
+    font-size: 12pt;
 }

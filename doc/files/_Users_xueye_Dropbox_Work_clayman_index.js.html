@@ -47,6 +47,8 @@
             
                 <li><a href="../classes/SelectorRuleSet.html">SelectorRuleSet</a></li>
             
+                <li><a href="../classes/StyleSheet.html">StyleSheet</a></li>
+            
             </ul>
 
             <ul id="api-modules" class="apis modules">
@@ -225,28 +227,54 @@ var Clayman;
             this.hash = newHash;
             return newHash;
         };
+        /**
+         * Displays the rule set as a css string
+         *
+         * @method toString
+         * @return {String} The result
+         */
         SelectorRuleSet.prototype.toString = function () {
+            var ruleKeys = Object.keys(this.rules);
+            if (ruleKeys.length === 0)
+                return &quot;&quot;;
+            var ret = this.selector + &quot; {\n&quot;;
+            ret += this.bodyString();
+            ret += &quot;\n}&quot;;
+            return ret;
+        };
+        /**
+         * Convenience function that returns the body of the CSS block as a string
+         *
+         * @method bodyString
+         * @return {String} The result
+         */
+        SelectorRuleSet.prototype.bodyString = function () {
             var _this = this;
             var ruleKeys = Object.keys(this.rules);
             if (ruleKeys.length === 0)
                 return &quot;&quot;;
-            var ret = this.selector + &quot; {&quot;;
-            ret += &quot;\n&quot;;
-            ret += ruleKeys.map(function (ruleKey) {
+            return ruleKeys.map(function (ruleKey) {
                 return &quot;\t&quot; + ruleKey + &quot;: &quot; + _this.rules[ruleKey] + &quot;;&quot;;
             }).join(&quot;\n&quot;);
-            ret += &quot;\n}&quot;;
-            return ret;
         };
         return SelectorRuleSet;
     })();
     var StyleSheet = (function () {
+        /**
+         * A Representation of a StyleSheet
+         *
+         * @class StyleSheet
+         * @constructor
+         */
         function StyleSheet() {
             this.selectors = {};
         }
-        StyleSheet.prototype.media = function (node) {
-            return &quot;&quot;;
-        };
+        /**
+         * Outputs the plaintext representing the StyleSheet
+         *
+         * @method toString
+         * @return {String} The result
+         */
         StyleSheet.prototype.toString = function () {
             var _this = this;
             var keys = Object.keys(this.selectors);
@@ -262,8 +290,25 @@ var Clayman;
             });
             var identifierDictKeys = Object.keys(identifierDict);
             identifierDictKeys.forEach(function (identifierKey) {
-                var currList = identifierDict[identifierKey].map(function (rule) {
-                    return rule.toString();
+                var hashGroups = {};
+                identifierDict[identifierKey].forEach(function (rule) {
+                    var hash = rule.getHash();
+                    if (hashGroups[hash]) {
+                        hashGroups[hash].push(rule);
+                    }
+                    else {
+                        hashGroups[hash] = [rule];
+                    }
+                });
+                var currList = Object.keys(hashGroups).map(function (groupKey) {
+                    var group = hashGroups[groupKey];
+                    var newSelector = group.map(function (entry) {
+                        return entry.selector;
+                    }).join(&quot;, &quot;);
+                    var ret = newSelector + &quot; {\n&quot;;
+                    ret += group[0].bodyString();
+                    ret += &quot;\n}&quot;;
+                    return ret;
                 }).filter(function (ruleStr) {
                     return !!ruleStr;
                 });
@@ -274,7 +319,9 @@ var Clayman;
                     indent = true;
                     ret += &quot;\n@&quot; + identifierKey + &quot;{\n&quot;;
                 }
-                var ruleStringsJoined = currList.join(&quot;\n&quot;);
+                var ruleStringsJoined = currList.map(function (entry) {
+                    return entry;
+                }).join(&quot;\n\n&quot;);
                 if (indent) {
                     // add a tab
                     ruleStringsJoined = ruleStringsJoined.replace(/(^|\n)/g, &#x27;$1\t&#x27;);
@@ -286,6 +333,14 @@ var Clayman;
             });
             return ret;
         };
+        /**
+         * Adds a set of rules to the StyleSheet
+         *
+         * @param {String} selector The CSS Selector
+         * @param {String} parentIdentifier A way to identify the parent (root, media query, etc)
+         * @param {Array} declarations An array of style declarations
+         * @method addRuleSet
+         */
         StyleSheet.prototype.addRuleSet = function (selector, parentIdentifier, declarations) {
             var identifier = (parentIdentifier ? parentIdentifier + &quot;|&quot; : &#x27;&#x27;) + selector;
             if (!this.selectors[identifier]) {
@@ -296,7 +351,12 @@ var Clayman;
                 ruleSet.addRule(declaration.prop, declaration.value);
             });
         };
-        // one day we&#x27;ll figure out how to get postcss&#x27; definitions working...
+        /**
+         * Convenience Function; adds a node from parsecss to the stylesheet
+         *
+         * @param {Object} node The parseCSS node
+         * @method addNode
+         */
         StyleSheet.prototype.addNode = function (node) {
             var _this = this;
             var selectors = getAllSelectors(node.selector);
@@ -311,6 +371,13 @@ var Clayman;
                 _this.addRuleSet(selector, parentIdentifier, declarations);
             });
         };
+        /**
+         * Creates a new StyleSheet containing the difference between the current StyleSheet and another StyleSheet.
+         *
+         * @param {StyleSheet} other The StyleSheet to extract a difference against
+         * @method difference
+         * @return {StyleSheet} A StyleSheet representing the difference
+         */
         StyleSheet.prototype.difference = function (other) {
             var _this = this;
             if (!other)
@@ -346,6 +413,13 @@ var Clayman;
             });
             return ret;
         };
+        /**
+         * Creates a new StyleSheet containing the combined properties and rules of the current StyleSheet and another.
+         *
+         * @param {StyleSheet} other The other StyleSheet
+         * @method merge
+         * @return {StyleSheet} A StyleSheet representing the union of the two
+         */
         StyleSheet.prototype.merge = function (other) {
             var _this = this;
             if (!other)
@@ -380,6 +454,14 @@ var Clayman;
         function Clayman(postcss) {
             this.postcss = postcss;
         }
+        /**
+         * Takes two or more StyleSheets and returns a difference of their rules in a Clayman StyleSheet
+         *
+         * @method difference
+         * @param {Array} sources An array of strings representing CSS Stylesheets
+         * @return {StyleSheet} Returns a ClaymanStylesheet representing the difference
+         * between the base and all other stylesheets
+         */
         Clayman.prototype.difference = function () {
             var _this = this;
             var sources = [];
@@ -400,12 +482,11 @@ var Clayman;
             return diff;
         };
         /**
-         * Takes a CSS string and converts it into a set of selectors -&gt; rules,
-         * removing redundancy for each selector.
+         * Takes a CSS string and converts it into a compacted Clayman StyleSheet
          *
          * @method compact
          * @param {String} source A string representing CSS styles
-         * @return {Object} Returns an object with selector name -&gt; {prop: value}
+         * @return {StyleSheet} A Clayman StyleSheet of the source
          */
         Clayman.prototype.compact = function (source) {
             var compacted = this.postcss.parse(source);

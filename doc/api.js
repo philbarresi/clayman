@@ -3,7 +3,8 @@ YUI.add("yuidoc-meta", function(Y) {
     "classes": [
         "ArgumentNullException",
         "Clayman",
-        "SelectorRuleSet"
+        "SelectorRuleSet",
+        "StyleSheet"
     ],
     "modules": [],
     "allModules": []
