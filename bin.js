@@ -1,4 +1,6 @@
-var argv = require('minimist')(process.argv.slice(2)),
+#!/usr/bin/env node
+
+ var argv = require('minimist')(process.argv.slice(2)),
     clayman = require('./'),
     FS = require("q-io/fs"),
     path = require('path'),
