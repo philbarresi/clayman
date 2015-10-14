@@ -1,6 +1,6 @@
 {
   "name": "clayman",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A CSS diff tool to take a base styesheet and theme stylesheet and remove the redundancies from the theme.",
   "main": "index.js",
   "scripts": {
@@ -10,10 +10,16 @@
     "css",
     "diff"
   ],
+  "bin": {
+    "clayman": "bin.js"
+  },
   "author": "Phil Barresi",
   "license": "ISC",
   "dependencies": {
-    "postcss": "^5.0.9"
+    "minimist": "^1.2.0",
+    "postcss": "^5.0.9",
+    "q": "^1.4.1",
+    "q-io": "^1.13.1"
   },
   "devDependencies": {
     "chai": "^3.3.0",
