@@ -43,6 +43,13 @@ describe('Theme DNA', function () {
             var source2 = fs.readFileSync(path.join(__dirname, 'simple-style-2.css')).toString();
 
             var result = clayman.difference(source1, source2);
+        });
+
+        it('Should give a diff when comparing 2 bootstraps', function () {
+            var source1 = fs.readFileSync(path.join(__dirname, 'bootstrap.css')).toString();
+            var source2 = fs.readFileSync(path.join(__dirname, 'bootstrap-updated-bg-color.css')).toString();
+
+            var result = clayman.difference(source1, source2);
             console.log(result.toString());
         });
     })
