@@ -50,7 +50,14 @@ describe('Theme DNA', function () {
             var source2 = fs.readFileSync(path.join(__dirname, 'bootstrap-updated-bg-color.css')).toString();
 
             var result = clayman.difference(source1, source2);
-            console.log(result.toString());
+        });
+
+        it('Should give an empty diff when comparing 2 bootstraps', function () {
+            var source1 = fs.readFileSync(path.join(__dirname, 'bootstrap.css')).toString();
+            var source2 = fs.readFileSync(path.join(__dirname, 'bootstrap.css')).toString();
+
+            var result = clayman.difference(source1, source2).toString().trim();
+            assert.equal(result, "");
         });
     })
 
