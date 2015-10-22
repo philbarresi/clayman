@@ -1,7 +1,7 @@
 /// <reference path="./typings/node/node.d.ts"/>
 var postcss = require('postcss');
 var Clayman;
-(function (Clayman_1) {
+(function (Clayman) {
     function getAllSelectors(selector) {
         if (!selector)
             throw new ArgumentNullException("selector");
@@ -347,9 +347,44 @@ var Clayman;
             });
             return ret;
         };
+        /**
+         * Adds a namespace to the CSS selector; ie, given namespace `ns`, html -> html.ns, body -> .ns body { }
+         *
+         * @param {string} ns The namespace
+         * @method namespace
+         * @return {StyleSheet} Returns self
+         */
+        StyleSheet.prototype.namespace = function (ns) {
+            var _this = this;
+            if (!ns)
+                throw new ArgumentNullException("ns");
+            // If they just give a string, treat it as a class
+            if (ns.indexOf(".") !== 0 && ns.indexOf("#") !== 0)
+                ns = "." + ns;
+            var keys = Object.keys(this.selectors);
+            var makeNewSelector = function (selector) {
+                var newSelector = "";
+                // If it starts with html, rewrite accordingly
+                if (selector.indexOf("html") === 0) {
+                    newSelector = "html" + ns + selector.slice(4);
+                }
+                else {
+                    newSelector = ns + " " + selector;
+                }
+                return newSelector;
+            };
+            keys.forEach(function (key) {
+                var curr = _this.selectors[key];
+                var newKey = makeNewSelector(key);
+                _this.selectors[newKey] = _this.selectors[key];
+                curr.selector = makeNewSelector(curr.selector);
+                delete _this.selectors[key];
+            });
+            return this;
+        };
         return StyleSheet;
     })();
-    var Clayman = (function () {
+    var Base = (function () {
         /**
          * The main class of Clayman
          *
@@ -357,7 +392,7 @@ var Clayman;
          * @param {PostCSS} postcss An instance of PostCSS
          * @constructor
          */
-        function Clayman(postcss) {
+        function Base(postcss) {
             this.postcss = postcss;
         }
         /**
@@ -368,7 +403,7 @@ var Clayman;
          * @return {StyleSheet} Returns a ClaymanStylesheet representing the difference
          * between the base and all other stylesheets
          */
-        Clayman.prototype.difference = function () {
+        Base.prototype.difference = function () {
             var _this = this;
             var sources = [];
             for (var _i = 0; _i < arguments.length; _i++) {
@@ -394,7 +429,7 @@ var Clayman;
          * @param {String} source A string representing CSS styles
          * @return {StyleSheet} A Clayman StyleSheet of the source
          */
-        Clayman.prototype.compact = function (source) {
+        Base.prototype.compact = function (source) {
             var compacted = this.postcss.parse(source);
             // We flatten out into one node array
             var nodes = [];
@@ -414,6 +449,16 @@ var Clayman;
             return stylesheet;
         };
         /**
+         * Takes a CSS string and converts it into a compacted Clayman StyleSheet; convenience function that calls compact
+         *
+         * @method from
+         * @param {String} source A string representing CSS styles
+         * @return {StyleSheet} A Clayman StyleSheet of the source
+         */
+        Base.prototype.from = function (source) {
+            return this.compact(source);
+        };
+        /**
          * Takes a CSS selector string (ie: ".foo, span.bar") and extracts all the individual selectors from it.
          *
          * @method getAllSelectors
@@ -421,11 +466,11 @@ var Clayman;
          * @param {String} source A string representing any number of CSS selectors
          * @return {Array} Returns an array of strings with the selector names
          */
-        Clayman.prototype.getAllSelectors = function (selector) {
+        Base.prototype.getAllSelectors = function (selector) {
             return getAllSelectors(selector);
         };
-        return Clayman;
+        return Base;
     })();
-    Clayman_1.Clayman = Clayman;
+    Clayman.Base = Base;
 })(Clayman || (Clayman = {}));
-module.exports = new Clayman.Clayman(postcss);
+module.exports = new Clayman.Base(postcss);

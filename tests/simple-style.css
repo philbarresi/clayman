@@ -22,3 +22,18 @@ p, a {
 }
 
 
+.foo, html {
+    color: #867530;
+}
+
+html {
+    color: #999;
+}
+
+html#bar {
+    font-family: "Helvetica Neue";
+}
+
+html.foo {
+    text-align: center;
+}

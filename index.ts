@@ -403,6 +403,49 @@ module Clayman {
 
 
         /**
+         * Adds a namespace to the CSS selector; ie, given namespace `ns`, html -> html.ns, body -> .ns body { }
+         *
+         * @param {string} ns The namespace
+         * @method namespace
+         * @return {StyleSheet} Returns self
+         */
+        public namespace(ns:string) {
+            if (!ns) throw new ArgumentNullException("ns");
+
+            // If they just give a string, treat it as a class
+            if (ns.indexOf(".") !== 0 && ns.indexOf("#") !== 0) ns = "." + ns;
+
+            var keys = Object.keys(this.selectors);
+
+            var makeNewSelector = (selector:string):string=> {
+                var newSelector = "";
+
+                // If it starts with html, rewrite accordingly
+                if (selector.indexOf("html") === 0) {
+                    newSelector = "html" + ns + selector.slice(4);
+                } else {
+                    newSelector = ns + " " + selector;
+                }
+
+                return newSelector;
+            };
+
+            keys.forEach((key) => {
+                var curr = this.selectors[key];
+                var newKey = makeNewSelector(key);
+
+                this.selectors[newKey] = this.selectors[key];
+
+                curr.selector = makeNewSelector(curr.selector);
+
+                delete this.selectors[key];
+            });
+
+
+            return this;
+        }
+
+        /**
          * A Representation of a StyleSheet
          *
          * @class StyleSheet
@@ -413,7 +456,7 @@ module Clayman {
         }
     }
 
-    export class Clayman {
+    export class Base {
         /**
          * Takes two or more StyleSheets and returns a difference of their rules in a Clayman StyleSheet
          *
@@ -474,6 +517,17 @@ module Clayman {
         }
 
         /**
+         * Takes a CSS string and converts it into a compacted Clayman StyleSheet; convenience function that calls compact
+         *
+         * @method from
+         * @param {String} source A string representing CSS styles
+         * @return {StyleSheet} A Clayman StyleSheet of the source
+         */
+        public from(source:string):StyleSheet {
+            return this.compact(source);
+        }
+
+        /**
          * Takes a CSS selector string (ie: ".foo, span.bar") and extracts all the individual selectors from it.
          *
          * @method getAllSelectors
@@ -498,4 +552,4 @@ module Clayman {
 }
 
 
-export = new Clayman.Clayman(postcss);
+export = new Clayman.Base(postcss);
